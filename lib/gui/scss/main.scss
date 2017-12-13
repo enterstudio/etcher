@@ -20,6 +20,7 @@ $cursor-disabled: initial;
 $link-hover-decoration: none;
 $btn-min-width: 170px;
 $link-color: #ddd;
+$disabled-opacity: 0.2;
 
 @import "../../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
 @import "./modules/theme";
@@ -31,9 +32,9 @@ $link-color: #ddd;
 @import "./components/button";
 @import "./components/tick";
 @import "../components/modal/styles/modal";
-@import "../components/update-notifier/styles/update-notifier";
 @import "../components/progress-button/styles/progress-button";
 @import "../components/drive-selector/styles/drive-selector";
+@import "../components/svg-icon/styles/svg-icon";
 @import "../components/tooltip-modal/styles/tooltip-modal";
 @import "../components/warning-modal/styles/warning-modal";
 @import "../pages/main/styles/main";
@@ -84,6 +85,27 @@ body {
     right: 0;
     top: 50%;
   }
+
+  > span[os-open-external] {
+    display: flex;
+  }
+}
+
+.section-loader {
+  webview {
+    flex: 0 1;
+    height: 0;
+    width: 0;
+  }
+
+  &.isFinish webview {
+    flex: initial;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 255px;
+  }
 }
 
 .wrapper {
@@ -99,5 +121,21 @@ body {
   > .button {
     padding-left: 3px;
     padding-right: 3px;
+  }
+}
+
+@keyframes focus-highlight {
+  from {
+    outline: 2px solid $palette-theme-warning-background;
+  }
+
+  to {
+    outline: none;
+  }
+}
+
+[tabindex] {
+  &:focus {
+    animation: focus-highlight 10s steps(2, end) forwards;
   }
 }

@@ -3,6 +3,159 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.1.2 - 2017-08-07
+
+### Features
+
+- Add support for `.rpi-sdcard` images
+
+### Fixes
+
+- Avoid "broken" icon when selecting a zip image archive with invalid SVG
+- Fix `UNABLE_TO_GET_ISSUER_CERT_LOCALLY` error at startup when behind certain proxies
+- Fix `EHOSTDOWN` error at startup
+- Display a user-friendly error message if the user is not in the sudoers file
+- Make archive-embedded SVG icons work again
+- Fix "imageBasename is not defined" error on the CLI
+- Fix various drive scanning Windows errors
+
+### Misc
+
+- Improve Windows drive detection error codes.
+
+## v1.1.1 - 2017-07-25
+
+### Fixes
+
+- Prevent "percentage above 100%" errors on DMG images
+- Fix Etcher not starting flashes in AppImages
+- Fix most "Unmount failed" errors on macOS
+
+## v1.1.0 - 2017-07-20
+
+### Features
+
+- Add image name, drive name, and icon to OS notifications
+- Add support for `.sdcard` images
+- Start publishing RPM packages
+- Generate single-binary portable installers on Windows
+- Show friendlier error dialogs when opening an image results in an error
+- Generate one-click Windows NSIS installers
+- Show the application version in the WebView banners
+- Show a warning message if the selected image has no partition table
+- Make use of `pkg` to package the Etcher CLI
+- Send anonymous analytics about package types
+- Minor style improvements to the fallback success page banner
+- Turn the update notifier modal into a native dialog
+
+### Fixes
+
+- Fix "You don't have access to this resource" error at startup when behind a firewall
+- Fix `UNABLE_TO_VERIFY_LEAF_SIGNATURE` error at startup when behind a proxy
+- Reset webview after navigating away from the success screen
+- Fix occasional increased CPU usage because of perl regular expression in macOS
+- Don't install to `C:\Program Files (x86)` on 64-bit Windows systems
+- Fix "file is not accessible" error when flashing an image that lives inside a directory whose name is UTF-16 encoded on Windows.
+- Fix various interrelated Windows `.bat` spawning issues
+- Fix 0.0 GB Windows drive detection issues
+- Cleanup drive detection temporary scripts in GNU/Linux and macOS
+- Ensure no analytics events are sent if error reporting is disabled
+- Retry various times on `EAGAIN` when spawning drive scanning scripts
+- Don't break up size numbers in the drive selector
+
+### Misc
+
+- Remove "Advanced" settings subtitle
+- Remove support for the `ETCHER_DISABLE_UPDATES` environment variable
+- Swap speed and time below the flashing progress bar
+
+## v1.0.0 - 2017-05-12
+
+### Features
+
+- Implement a dynamic finish page.
+- Display nicer error dialog when reading an invalid image.
+
+### Fixes
+
+- Prevent drive from getting re-mounted in macOS even when the unmount on success setting is enabled.
+- Fix `ECONNRESET` and `ECONNREFUSED` errors when checking for updates on unstable connections.
+- Fix application stuck at "Starting..." on Windows.
+- Fix error on startup when Windows username contained an ampersand.
+
+## v1.0.0-rc.5 - 2017-05-02
+
+### Fixes
+
+- Fix various elevation issues on Windows
+- Treat unknown images as octet stream
+- Fix uncaught errors when cancelling elevation requests on Windows when the system's language is not English.
+
+## v1.0.0-rc.4 - 2017-04-22
+
+### Fixes
+
+- Fix "Unmount failed" on Windows where the PC is connected to network drives.
+- Various fixes for when drive descriptions contain special characters.
+
+### Misc
+
+- Show a friendly user message on EIO after many retries.
+- Show user friendly messages for `EBUSY, read` and `EBUSY, write` errors on macOS.
+
+## v1.0.0-rc.3 - 2017-04-14
+
+### Fixes
+
+- Show a user friendly message when the drive is unplugged half-way through.
+- Fix "UNKNOWN: unknown error" error when unplugging an SD Card from an internal reader on Windows.
+- Fix "function createError(opts) {}" error on validation failure.
+- Fix "Unmount failed, invalid drive" error on Windows.
+- Fix Apple disk image detection & streaming.
+
+### Misc
+
+- Improve error reporting accuracy.
+
+## v1.0.0-rc.2 - 2017-04-11
+
+### Fixes
+
+- Display a user error if the image is no longer accessible when the writer starts.
+- Prevent uncaught `EISDIR` when dropping a directory to the application.
+- Fix "Path must be a string. Received undefined" when selecting Apple images.
+- Don't interpret certain ISO images as unsupported.
+
+## v1.0.0-rc.1 - 2017-04-10
+
+### Features
+
+- Add support for Apple Disk images.
+- Add the un-truncated drive description to the selected drive step tooltip.
+- Prevent flashing an image that is larger than the drive with the CLI.
+
+### Fixes
+
+- Prevent progress button percentage to exceed 100%.
+- Don't print stack traces by default in the CLI.
+- Prevent blank application when sending SIGINT on GNU/Linux and macOS.
+- Fix unmounting freezing in macOS.
+- Fix GNU/Linux udev error when `net.ifnames` is set.
+- Fix `ENOSPC` image alignment errors.
+- Fix errors when unplugging drives exactly when the drive scanning scripts are running.
+- Fix several unmount related issues in all platforms.
+- Fix "rawr i'm a dinosaur" bzip2 error.
+
+### Misc
+
+- Make errors more user friendly throughout the application.
+- Don't report "invalid archive" errors to TrackJS.
+- Stop drive scanning loop if an error occurs.
+- Don't include user paths in Mixpanel analytics events.
+- Provide a user friendly error message when no polkit authentication agent is available on the system.
+- Show friendly drive name instead of device name in the main screen.
+- Start reporting errors to Sentry instead of to TrackJS.
+
 ## v1.0.0-beta.19 - 2017-02-24
 
 ### Features

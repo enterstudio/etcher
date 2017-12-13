@@ -54,16 +54,9 @@ then
   usage
 fi
 
-if [ "$ARGV_ARCHITECTURE" == "x64" ]; then
-  DOCKERFILE="$HERE/Dockerfile-x86_64"
-elif [ "$ARGV_ARCHITECTURE" == "x86" ]; then
-  DOCKERFILE="$HERE/Dockerfile-i686"
-else
-  echo "Unsupported architecture: $ARGV_ARCHITECTURE" 1>&2
-  exit 1
-fi
-
-IMAGE_ID="etcher-build-$ARGV_ARCHITECTURE"
+DOCKER_ARCHITECTURE=$(./scripts/build/architecture-convert.sh -r "$ARGV_ARCHITECTURE" -t docker)
+DOCKERFILE="$HERE/Dockerfile-$DOCKER_ARCHITECTURE"
+IMAGE_ID="etcher-build-$DOCKER_ARCHITECTURE"
 
 docker build -f "$DOCKERFILE" -t "$IMAGE_ID" "$ARGV_SOURCE_CODE_DIRECTORY"
 
@@ -80,7 +73,7 @@ fi
 # and http://mywiki.wooledge.org/BashFAQ/050
 # and http://stackoverflow.com/a/7577209
 DOCKER_ENVVARS=()
-for COPYVAR in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY RELEASE_TYPE CI; do
+for COPYVAR in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY ANALYTICS_SENTRY_TOKEN ANALYTICS_MIXPANEL_TOKEN RELEASE_TYPE BINTRAY_USER BINTRAY_API_KEY CI; do
   eval "if [ ! -z \${$COPYVAR+x} ]; then DOCKER_ENVVARS+=(\"--env\" \"$COPYVAR=\$$COPYVAR\"); fi"
 done
 
@@ -89,7 +82,9 @@ done
 # The `-t` and TERM setup is needed to display coloured output.
 docker run -t \
   --env "TERM=xterm-256color" \
+  --env "TARGET_ARCH=$ARGV_ARCHITECTURE" \
   ${DOCKER_ENVVARS[@]+"${DOCKER_ENVVARS[@]}"} \
+  --privileged \
   --cap-add SYS_ADMIN \
   --device /dev/fuse:/dev/fuse:mrw \
   --volume "$ARGV_SOURCE_CODE_DIRECTORY:/etcher" \

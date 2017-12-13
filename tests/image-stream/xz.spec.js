@@ -14,52 +14,51 @@
  * limitations under the License.
  */
 
-'use strict';
+'use strict'
 
-const m = require('mochainon');
-const fs = require('fs');
-const path = require('path');
-const DATA_PATH = path.join(__dirname, 'data');
-const IMAGES_PATH = path.join(DATA_PATH, 'images');
-const XZ_PATH = path.join(DATA_PATH, 'xz');
-const imageStream = require('../../lib/image-stream/index');
-const tester = require('./tester');
+const m = require('mochainon')
+const fs = require('fs')
+const path = require('path')
+const DATA_PATH = path.join(__dirname, 'data')
+const IMAGES_PATH = path.join(DATA_PATH, 'images')
+const XZ_PATH = path.join(DATA_PATH, 'xz')
+const imageStream = require('../../lib/image-stream/index')
+const tester = require('./tester')
 
-describe('ImageStream: XZ', function() {
+describe('ImageStream: XZ', function () {
+  this.timeout(tester.DEFAULT_IMAGE_TESTS_TIMEOUT)
 
-  this.timeout(20000);
-
-  describe('.getFromFilePath()', function() {
-
-    describe('given a xz image', function() {
+  describe('.getFromFilePath()', function () {
+    describe('given a xz image', function () {
       tester.extractFromFilePath(
-        path.join(XZ_PATH, 'raspberrypi.img.xz'),
-        path.join(IMAGES_PATH, 'raspberrypi.img'));
-    });
+        path.join(XZ_PATH, 'etcher-test.img.xz'),
+        path.join(IMAGES_PATH, 'etcher-test.img'))
+    })
+  })
 
-  });
+  describe('.getImageMetadata()', function () {
+    it('should return the correct metadata', function () {
+      const image = path.join(XZ_PATH, 'etcher-test.img.xz')
+      const compressedSize = fs.statSync(image).size
+      const uncompressedSize = fs.statSync(path.join(IMAGES_PATH, 'etcher-test.img')).size
 
-  describe('.getImageMetadata()', function() {
-
-    it('should return the correct metadata', function(done) {
-      const image = path.join(XZ_PATH, 'raspberrypi.img.xz');
-      const compressedSize = fs.statSync(image).size;
-      const uncompressedSize = fs.statSync(path.join(IMAGES_PATH, 'raspberrypi.img')).size;
-
-      imageStream.getImageMetadata(image).then((metadata) => {
+      return imageStream.getImageMetadata(image).then((metadata) => {
         m.chai.expect(metadata).to.deep.equal({
+          path: image,
+          extension: 'img',
+          archiveExtension: 'xz',
           size: {
             original: compressedSize,
             final: {
               estimation: false,
               value: uncompressedSize
             }
-          }
-        });
-        done();
-      });
-    });
-
-  });
-
-});
+          },
+          hasMBR: true,
+          hasGPT: false,
+          partitions: require('./data/images/etcher-test-partitions.json')
+        })
+      })
+    })
+  })
+})

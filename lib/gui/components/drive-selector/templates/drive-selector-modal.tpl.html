@@ -1,53 +1,44 @@
 <div class="modal-header">
   <h4 class="modal-title">Select a Drive</h4>
-  <button class="close" ng-click="modal.closeModal()">&times;</button>
+  <button tabindex="14" class="close" ng-click="modal.closeModal()">&times;</button>
 </div>
 
 <div class="modal-body">
   <ul class="list-group">
-    <li class="list-group-item" ng-repeat="drive in modal.drives.getDrives() track by drive.device"
+    <li class="list-group-item" ng-repeat="drive in modal.getDrives() track by drive.device"
       ng-disabled="!modal.constraints.isDriveValid(drive, modal.state.getImage())"
       ng-dblclick="modal.selectDriveAndClose(drive)"
       ng-click="modal.toggleDrive(drive)">
-        <div>
-          <h4 class="list-group-item-heading">{{ drive.description }} - {{ drive.size | gigabyte | number:1 }} GB</h4>
-          <p class="list-group-item-text">{{ drive.name }}</p>
+        <img class="list-group-item-section" alt="Drive device type logo"
+          ng-if="drive.icon"
+          ng-src="./assets/{{drive.icon}}.svg"
+          width="25"
+          height="30">
+        <div
+          class="list-group-item-section list-group-item-section-expanded"
+          tabindex="{{ 15 + $index }}"
+          ng-keypress="modal.keyboardToggleDrive(drive, $event)">
+
+          <h4 class="list-group-item-heading">{{ drive.description }} -
+            <span class="word-keep"
+              ng-show="drive.size">{{ drive.size | closestUnit }}</span>
+          </h4>
+          <p class="list-group-item-text">{{ drive.displayName }}</p>
 
           <footer class="list-group-item-footer">
 
-            <span class="label label-warning"
-                ng-show="modal.constraints.isDriveLargeEnough(drive, modal.state.getImage()) && !modal.constraints.isDriveLocked(drive) && !modal.constraints.isDriveSizeRecommended(drive, modal.state.getImage())">
-                <i class="glyphicon glyphicon-warning-sign"></i>
-                Not Recommended</span>
-
-            <!-- There can be a case where the device it not large enough, and it's also locked. -->
-            <!-- Since in this case both labels will be displayed, we chose to only show the -->
-            <!-- "not large enough label", since from the point of view of the user, the locked -->
-            <!-- state is irrelevant if the drive is not large enough anyway. -->
-
-            <span class="label label-danger"
-              ng-hide="modal.constraints.isDriveLargeEnough(drive, modal.state.getImage())">
-                <i class="glyphicon glyphicon-resize-small"></i>
-                Too Small For Image</span>
-
-            <span class="label label-danger"
-              ng-show="modal.constraints.isDriveLocked(drive) && modal.constraints.isDriveLargeEnough(drive, modal.state.getImage())">
-                <i class="glyphicon glyphicon-lock"></i>
-                Locked</span>
-
-            <span class="label label-danger"
-              ng-show="modal.constraints.isSystemDrive(drive)">
-                <i class="glyphicon glyphicon-hdd"></i>
-                System Drive</span>
-
-            <span class="label label-danger"
-              ng-show="modal.constraints.isSourceDrive(drive, modal.state.getImage())">
-                <i class="glyphicon glyphicon-circle-arrow-down"></i>
-                Source Drive</span>
+            <span class="label" ng-repeat="status in modal.getDriveStatuses(drive)"
+              ng-class="{
+                'label-warning': status.type === modal.constraints.COMPATIBILITY_STATUS_TYPES.WARNING,
+                'label-danger': status.type === modal.constraints.COMPATIBILITY_STATUS_TYPES.ERROR
+              }">
+              <b>{{ status.message }}</b>
+            </span>
 
           </footer>
+          <progress ng-if="drive.progress" value="{{ drive.progress }}" max="100"></progress>
         </div>
-        <span class="tick tick--success"
+        <span class="list-group-item-section tick tick--success"
           ng-show="modal.constraints.isDriveValid(drive, modal.state.getImage())"
           ng-disabled="!modal.state.isCurrentDrive(drive.device)"></span>
     </li>
@@ -63,6 +54,7 @@
 
 <div class="modal-footer">
   <button class="button button-primary button-block"
+    tabindex="{{ 15 + modal.getDrives().length }}"
     ng-click="modal.closeModal()"
     ng-disabled="!modal.state.hasDrive()">Continue</button>
 </div>

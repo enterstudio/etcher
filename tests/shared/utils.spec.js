@@ -14,323 +14,115 @@
  * limitations under the License.
  */
 
-'use strict';
+'use strict'
 
-const m = require('mochainon');
-const utils = require('../../lib/shared/utils');
-const path = require('path');
+const m = require('mochainon')
+const utils = require('../../lib/shared/utils')
 
-describe('Shared: Utils', function() {
+describe('Shared: Utils', function () {
+  describe('.isValidPercentage()', function () {
+    it('should return false if percentage is not a number', function () {
+      m.chai.expect(utils.isValidPercentage('50')).to.be.false
+    })
 
-  describe('.makeFlatStartCaseObject()', function() {
+    it('should return false if percentage is null', function () {
+      m.chai.expect(utils.isValidPercentage(null)).to.be.false
+    })
 
-    it('should return undefined if given undefined', function() {
-      m.chai.expect(utils.makeFlatStartCaseObject(undefined)).to.be.undefined;
-    });
+    it('should return false if percentage is undefined', function () {
+      m.chai.expect(utils.isValidPercentage(undefined)).to.be.false
+    })
 
-    it('should return flat object with start case keys if given nested object', function() {
-      const object = {
-        person: {
-          firstName: 'John',
-          lastName: 'Doe',
-          address: {
-            streetNumber: 13,
-            streetName: 'Elm'
-          }
-        }
-      };
+    it('should return false if percentage is an integer less than 0', function () {
+      m.chai.expect(utils.isValidPercentage(-1)).to.be.false
+    })
 
-      m.chai.expect(utils.makeFlatStartCaseObject(object)).to.deep.equal({
-        'Person First Name': 'John',
-        'Person Last Name': 'Doe',
-        'Person Address Street Number': 13,
-        'Person Address Street Name': 'Elm'
-      });
+    it('should return false if percentage is a float less than 0', function () {
+      m.chai.expect(utils.isValidPercentage(-0.1)).to.be.false
+    })
 
-    });
+    it('should return true if percentage is 0', function () {
+      m.chai.expect(utils.isValidPercentage(0)).to.be.true
+    })
 
-    it('should return an object with the key `value` if given `false`', function() {
-      m.chai.expect(utils.makeFlatStartCaseObject(false)).to.deep.equal({
-        Value: false
-      });
-    });
+    it('should return true if percentage is an integer greater than 0, but less than 100', function () {
+      m.chai.expect(utils.isValidPercentage(50)).to.be.true
+    })
 
-    it('should return an object with the key `value` if given `null`', function() {
-      m.chai.expect(utils.makeFlatStartCaseObject(null)).to.deep.equal({
-        Value: null
-      });
-    });
+    it('should return true if percentage is a float greater than 0, but less than 100', function () {
+      m.chai.expect(utils.isValidPercentage(49.55)).to.be.true
+    })
 
-    it('should preserve environment variable', function() {
-      m.chai.expect(utils.makeFlatStartCaseObject({
-        ETCHER_DISABLE_UPDATES: true
-      })).to.deep.equal({
-        ETCHER_DISABLE_UPDATES: true
-      });
-    });
+    it('should return true if percentage is 100', function () {
+      m.chai.expect(utils.isValidPercentage(100)).to.be.true
+    })
 
-    it('should preserve environment variables inside objects', function() {
-      m.chai.expect(utils.makeFlatStartCaseObject({
-        foo: {
-          FOO_BAR_BAZ: 3
-        }
-      })).to.deep.equal({
-        'Foo FOO_BAR_BAZ': 3
-      });
-    });
+    it('should return false if percentage is an integer greater than 100', function () {
+      m.chai.expect(utils.isValidPercentage(101)).to.be.false
+    })
 
-    it('should insert space after key starting with number', function() {
-      m.chai.expect(utils.makeFlatStartCaseObject({
-        foo: {
-          '1key': 1
-        }
-      })).to.deep.equal({
-        'Foo 1 Key': 1
-      });
-    });
+    it('should return false if percentage is a float greater than 100', function () {
+      m.chai.expect(utils.isValidPercentage(100.001)).to.be.false
+    })
+  })
 
-    it('should not modify start case keys', function() {
-      m.chai.expect(utils.makeFlatStartCaseObject({
-        Foo: {
-          'Start Case Key': 42
-        }
-      })).to.deep.equal({
-        'Foo Start Case Key': 42
-      });
-    });
+  describe('.percentageToFloat()', function () {
+    it('should throw an error if given a string percentage', function () {
+      m.chai.expect(function () {
+        utils.percentageToFloat('50')
+      }).to.throw('Invalid percentage: 50')
+    })
 
-    it('should not modify arrays', function() {
-      m.chai.expect(utils.makeFlatStartCaseObject([ 1, 2, {
-        nested: 3
-      } ])).to.deep.equal([ 1, 2, {
-        Nested: 3
-      } ]);
-    });
+    it('should throw an error if given a null percentage', function () {
+      m.chai.expect(function () {
+        utils.percentageToFloat(null)
+      }).to.throw('Invalid percentage: null')
+    })
 
-    it('should not modify nested arrays', function() {
-      m.chai.expect(utils.makeFlatStartCaseObject({
-        values: [ 1, 2, {
-          nested: 3
-        } ]
-      })).to.deep.equal({
-        Values: [ 1, 2, {
-          Nested: 3
-        } ]
-      });
-    });
+    it('should throw an error if given an undefined percentage', function () {
+      m.chai.expect(function () {
+        utils.percentageToFloat(undefined)
+      }).to.throw('Invalid percentage: undefined')
+    })
 
-    it('should leave nested arrays nested', function() {
-      m.chai.expect(utils.makeFlatStartCaseObject([ 1, 2, [ 3, 4 ] ])).to.deep.equal([ 1, 2, [ 3, 4 ] ]);
-    });
+    it('should throw an error if given an integer percentage < 0', function () {
+      m.chai.expect(function () {
+        utils.percentageToFloat(-1)
+      }).to.throw('Invalid percentage: -1')
+    })
 
-  });
+    it('should throw an error if given a float percentage < 0', function () {
+      m.chai.expect(function () {
+        utils.percentageToFloat(-0.1)
+      }).to.throw('Invalid percentage: -0.1')
+    })
 
-  describe('.hideAbsolutePathsInObject()', function() {
+    it('should covert a 0 percentage to 0', function () {
+      m.chai.expect(utils.percentageToFloat(0)).to.equal(0)
+    })
 
-    it('should return undefined if given undefined', function() {
-      m.chai.expect(utils.hideAbsolutePathsInObject(undefined)).to.be.undefined;
-    });
+    it('should covert an integer percentage to a float', function () {
+      m.chai.expect(utils.percentageToFloat(50)).to.equal(0.5)
+    })
 
-    it('should return null if given null', function() {
-      m.chai.expect(utils.hideAbsolutePathsInObject(null)).to.be.null;
-    });
+    it('should covert an float percentage to a float', function () {
+      m.chai.expect(utils.percentageToFloat(46.54)).to.equal(0.4654)
+    })
 
-    it('should return a clone of the object if there are no paths in the object', function() {
-      const object = {
-        numberProperty: 1,
-        nested: {
-          otherProperty: 'value'
-        }
-      };
-      m.chai.expect(utils.hideAbsolutePathsInObject(object)).to.not.equal(object);
-      m.chai.expect(utils.hideAbsolutePathsInObject(object)).to.deep.equal(object);
-    });
+    it('should covert a 100 percentage to 1', function () {
+      m.chai.expect(utils.percentageToFloat(100)).to.equal(1)
+    })
 
-    describe('given UNIX paths', function() {
+    it('should throw an error if given an integer percentage > 100', function () {
+      m.chai.expect(function () {
+        utils.percentageToFloat(101)
+      }).to.throw('Invalid percentage: 101')
+    })
 
-      beforeEach(function() {
-        this.isAbsolute = path.isAbsolute;
-        this.basename = path.basename;
-        path.isAbsolute = path.posix.isAbsolute;
-        path.basename = path.posix.basename;
-      });
-
-      afterEach(function() {
-        path.isAbsolute = this.isAbsolute;
-        path.basename = this.basename;
-      });
-
-      it('should replace absolute paths with the basename', function() {
-        const object = {
-          prop1: 'some value',
-          prop2: '/home/john/rpi.img'
-        };
-
-        m.chai.expect(utils.hideAbsolutePathsInObject(object)).to.deep.equal({
-          prop1: 'some value',
-          prop2: 'rpi.img'
-        });
-      });
-
-      it('should replace nested absolute paths with the basename', function() {
-        const object = {
-          nested: {
-            path: '/home/john/rpi.img'
-          }
-        };
-
-        m.chai.expect(utils.hideAbsolutePathsInObject(object)).to.deep.equal({
-          nested: {
-            path: 'rpi.img'
-          }
-        });
-      });
-
-      it('should not alter /dev/sdb', function() {
-        const object = {
-          nested: {
-            path: '/dev/sdb'
-          }
-        };
-
-        m.chai.expect(utils.hideAbsolutePathsInObject(object)).to.deep.equal({
-          nested: {
-            path: '/dev/sdb'
-          }
-        });
-      });
-
-      it('should not alter relative paths', function() {
-        const object = {
-          path: 'foo/bar'
-        };
-
-        m.chai.expect(utils.hideAbsolutePathsInObject(object)).to.deep.equal({
-          path: 'foo/bar'
-        });
-      });
-
-      it('should handle arrays', function() {
-        m.chai.expect(utils.hideAbsolutePathsInObject({
-          foo: 'foo',
-          bar: [
-            {
-              path: '/foo/bar/baz'
-            },
-            {
-              path: '/foo/bar/baz'
-            },
-            {
-              path: '/foo/bar/baz'
-            }
-          ]
-        })).to.deep.equal({
-          foo: 'foo',
-          bar: [
-            {
-              path: 'baz'
-            },
-            {
-              path: 'baz'
-            },
-            {
-              path: 'baz'
-            }
-          ]
-        });
-      });
-
-    });
-
-    describe('given Windows paths', function() {
-
-      beforeEach(function() {
-        this.isAbsolute = path.isAbsolute;
-        this.basename = path.basename;
-        path.isAbsolute = path.win32.isAbsolute;
-        path.basename = path.win32.basename;
-      });
-
-      afterEach(function() {
-        path.isAbsolute = this.isAbsolute;
-        path.basename = this.basename;
-      });
-
-      it('should replace absolute paths with the basename', function() {
-        const object = {
-          prop1: 'some value',
-          prop2: 'C:\\Users\\John\\rpi.img'
-        };
-
-        m.chai.expect(utils.hideAbsolutePathsInObject(object)).to.deep.equal({
-          prop1: 'some value',
-          prop2: 'rpi.img'
-        });
-
-      });
-
-      it('should replace nested absolute paths with the basename', function() {
-        const object = {
-          nested: {
-            path: 'C:\\Users\\John\\rpi.img'
-          }
-        };
-
-        m.chai.expect(utils.hideAbsolutePathsInObject(object)).to.deep.equal({
-          nested: {
-            path: 'rpi.img'
-          }
-        });
-      });
-
-      it('should not alter \\\\.\\PHYSICALDRIVE1', function() {
-        const object = {
-          nested: {
-            path: '\\\\.\\PHYSICALDRIVE1'
-          }
-        };
-
-        m.chai.expect(utils.hideAbsolutePathsInObject(object)).to.deep.equal({
-          nested: {
-            path: '\\\\.\\PHYSICALDRIVE1'
-          }
-        });
-      });
-
-      it('should not alter relative paths', function() {
-        const object = {
-          path: 'foo\\bar'
-        };
-
-        m.chai.expect(utils.hideAbsolutePathsInObject(object)).to.deep.equal({
-          path: 'foo\\bar'
-        });
-      });
-
-      it('should handle arrays', function() {
-        m.chai.expect(utils.hideAbsolutePathsInObject({
-          foo: 'foo',
-          bar: [ {
-            path: 'C:\\foo\\bar\\baz'
-          }, {
-            path: 'C:\\foo\\bar\\baz'
-          }, {
-            path: 'C:\\foo\\bar\\baz'
-          } ]
-        })).to.deep.equal({
-          foo: 'foo',
-          bar: [ {
-            path: 'baz'
-          }, {
-            path: 'baz'
-          }, {
-            path: 'baz'
-          } ]
-        });
-      });
-
-    });
-
-  });
-
-});
+    it('should throw an error if given a float percentage > 100', function () {
+      m.chai.expect(function () {
+        utils.percentageToFloat(100.01)
+      }).to.throw('Invalid percentage: 100.01')
+    })
+  })
+})

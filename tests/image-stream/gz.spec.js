@@ -14,52 +14,51 @@
  * limitations under the License.
  */
 
-'use strict';
+'use strict'
 
-const m = require('mochainon');
-const fs = require('fs');
-const path = require('path');
-const DATA_PATH = path.join(__dirname, 'data');
-const IMAGES_PATH = path.join(DATA_PATH, 'images');
-const GZ_PATH = path.join(DATA_PATH, 'gz');
-const imageStream = require('../../lib/image-stream/index');
-const tester = require('./tester');
+const m = require('mochainon')
+const fs = require('fs')
+const path = require('path')
+const DATA_PATH = path.join(__dirname, 'data')
+const IMAGES_PATH = path.join(DATA_PATH, 'images')
+const GZ_PATH = path.join(DATA_PATH, 'gz')
+const imageStream = require('../../lib/image-stream/index')
+const tester = require('./tester')
 
-describe('ImageStream: GZ', function() {
+describe('ImageStream: GZ', function () {
+  this.timeout(tester.DEFAULT_IMAGE_TESTS_TIMEOUT)
 
-  this.timeout(20000);
-
-  describe('.getFromFilePath()', function() {
-
-    describe('given a gz image', function() {
+  describe('.getFromFilePath()', function () {
+    describe('given a gz image', function () {
       tester.extractFromFilePath(
-        path.join(GZ_PATH, 'raspberrypi.img.gz'),
-        path.join(IMAGES_PATH, 'raspberrypi.img'));
-    });
+        path.join(GZ_PATH, 'etcher-test.img.gz'),
+        path.join(IMAGES_PATH, 'etcher-test.img'))
+    })
+  })
 
-  });
+  describe('.getImageMetadata()', function () {
+    it('should return the correct metadata', function () {
+      const image = path.join(GZ_PATH, 'etcher-test.img.gz')
+      const uncompressedSize = fs.statSync(path.join(IMAGES_PATH, 'etcher-test.img')).size
+      const compressedSize = fs.statSync(path.join(GZ_PATH, 'etcher-test.img.gz')).size
 
-  describe('.getImageMetadata()', function() {
-
-    it('should return the correct metadata', function(done) {
-      const image = path.join(GZ_PATH, 'raspberrypi.img.gz');
-      const uncompressedSize = fs.statSync(path.join(IMAGES_PATH, 'raspberrypi.img')).size;
-      const compressedSize = fs.statSync(path.join(GZ_PATH, 'raspberrypi.img.gz')).size;
-
-      imageStream.getImageMetadata(image).then((metadata) => {
+      return imageStream.getImageMetadata(image).then((metadata) => {
         m.chai.expect(metadata).to.deep.equal({
+          path: image,
+          extension: 'img',
+          archiveExtension: 'gz',
           size: {
             original: compressedSize,
             final: {
               estimation: true,
               value: uncompressedSize
             }
-          }
-        });
-        done();
-      });
-    });
-
-  });
-
-});
+          },
+          hasMBR: true,
+          hasGPT: false,
+          partitions: require('./data/images/etcher-test-partitions.json')
+        })
+      })
+    })
+  })
+})

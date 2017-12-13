@@ -10,18 +10,119 @@ High-level Etcher overview
 Make sure you checkout our [ARCHITECTURE.md][ARCHITECTURE] guide, which aims to
 explain how all the pieces fit together.
 
-Running locally
----------------
-
-See the [RUNNING-LOCALLY.md][RUNNING-LOCALLY] guide.
-
 Developing
 ----------
 
-We rely on various `npm` scripts to perform some common tasks:
+### Prerequisites
 
-- `npm run lint`: Run the linter.
-- `npm run sass`: Compile SCSS files.
+#### Common
+
+- [NodeJS](https://nodejs.org) (at least v6)
+- [Python](https://www.python.org)
+- [jq](https://stedolan.github.io/jq/)
+- [curl](https://curl.haxx.se/)
+
+```sh
+pip install -r requirements.txt
+```
+
+You might need to run this with `sudo` or administrator permissions.
+
+#### Windows
+
+- [NSIS v2.51](http://nsis.sourceforge.net/Main_Page) (v3.x won't work)
+- Either one of the following:
+  - [Visual C++ 2015 Build Tools](http://landinghub.visualstudio.com/visual-cpp-build-tools) containing standalone compilers, libraries and scripts
+  - Install the [windows-build-tools](https://github.com/felixrieseberg/windows-build-tools) via npm with `npm install --global windows-build-tools`
+  - [Visual Studio Community 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48146) (free) (other editions, like Professional and Enterprise, should work too)
+    **NOTE:** Visual Studio 2015 doesn't install C++ by default. You have to rerun the
+    setup, select "Modify" and then check `Visual C++ -> Common Tools for Visual
+    C++ 2015` (see http://stackoverflow.com/a/31955339)
+- [MinGW](http://www.mingw.org)
+
+You might need to `npm config set msvs_version 2015` for node-gyp to correctly detect
+the version of Visual Studio you're using (in this example VS2015).
+
+The following MinGW packages are required:
+
+- `msys-make`
+- `msys-unzip`
+- `msys-zip`
+- `msys-bash`
+- `msys-coreutils`
+
+#### OS X
+
+- [XCode](https://developer.apple.com/xcode/) or [XCode Command Line Tools],
+which can be installed by running `xcode-select --install`.
+
+#### Linux
+
+- `libudev-dev` for libusb (install with `sudo apt install libudev-dev` for example)
+
+### Cloning the project
+
+```sh
+git clone https://github.com/resin-io/etcher
+cd etcher
+```
+
+### Installing npm dependencies
+
+**NOTE:** Please make use of the following command to install npm dependencies rather
+than simply running `npm install` given that we need to do extra configuration
+to make sure native dependencies are correctly compiled for Electron, otherwise
+the application might not run successfully.
+
+If you're on Windows, **run the command from the _Developer Command Prompt for
+VS2015_**, to ensure all Visual Studio command utilities are available in the
+`%PATH%`.
+
+```sh
+make electron-develop
+```
+
+### Running the application
+
+#### GUI
+
+```sh
+npm start
+```
+
+#### CLI
+
+```sh
+node bin/etcher
+```
+
+Testing
+-------
+
+To run the test suite, run the following command:
+
+```sh
+npm test
+```
+
+Given the nature of this application, not everything can be unit tested. For
+example:
+
+- The writing operating on real raw devices.
+- Platform inconsistencies.
+- Style changes.
+- Artwork.
+
+We encourage our contributors to test the application on as many operating
+systems as they can before sending a pull request.
+
+*The test suite is run automatically by CI servers when you send a pull
+request.*
+
+We also rely on various `make` targets to perform some common tasks:
+
+- `make lint`: Run the linter.
+- `make sass`: Compile SCSS files.
 
 We make use of [EditorConfig] to communicate indentation, line endings and
 other text editing default. We encourage you to install the relevant plugin in
@@ -46,28 +147,33 @@ Use the following steps to ensure everything goes flawlessly:
 
 - Commit *both* `package.json` and `npm-shrinkwrap.json`.
 
-Testing
--------
+Diffing Binaries
+----------------
 
-To run the test suite, run the following command:
+Binary files are tagged as "binary" in the `.gitattributes` file, but also have
+a `diff=hex` tag, which allows you to see hexdump-style diffs for binaries,
+if you add the following to either your global or repository-local git config:
 
 ```sh
-npm test
+$ git config diff.hex.textconv hexdump
+$ git config diff.hex.binary true
 ```
 
-Given the nature of this application, not everything can be unit tested. For
-example:
+And global, respectively:
 
-- The writing operating on real raw devices.
-- Platform inconsistencies.
-- Style changes.
-- Artwork.
+```sh
+$ git config --global diff.hex.textconv hexdump
+$ git config --global diff.hex.binary true
+```
 
-We encourage our contributors to test the application on as many operating
-systems as they can before sending a pull request.
+If you don't have `hexdump` available on your platform,
+you can try [hxd], which is also a bit faster.
 
-*The test suite is run automatically by CI servers when you send a pull
-request.*
+Commit Guidelines
+-----------------
+
+See [COMMIT-GUIDELINES.md][COMMIT-GUIDELINES] for a thorough guide on how to
+write commit messages.
 
 Sending a pull request
 ----------------------
@@ -105,6 +211,8 @@ systems we support.
 Don't hesitate to get in touch if you have any questions or need any help!
 
 [ARCHITECTURE]: https://github.com/resin-io/etcher/blob/master/docs/ARCHITECTURE.md
-[RUNNING-LOCALLY]: https://github.com/resin-io/etcher/blob/master/docs/RUNNING-LOCALLY.md
+[COMMIT-GUIDELINES]: https://github.com/resin-io/etcher/blob/master/docs/COMMIT-GUIDELINES.md
 [EditorConfig]: http://editorconfig.org
 [shrinkwrap]: https://docs.npmjs.com/cli/shrinkwrap
+[hxd]: https://github.com/jhermsmeier/hxd
+[XCode Command Line Tools]: https://developer.apple.com/library/content/technotes/tn2339/_index.html

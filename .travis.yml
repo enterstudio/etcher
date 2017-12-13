@@ -1,7 +1,22 @@
 language: node_js
 sudo: false
 node_js:
-  - "6.1.0"
+  - "6.10.3"
+
+# Remove wine from cache
+before_cache:
+  - rm -rf $HOME/.cache/electron-builder/wine
+
+cache:
+  ccache: true
+  directories:
+    - $HOME/.cache/electron
+    - $HOME/.cache/electron-builder
+    - $HOME/.npm/_prebuilds
+    - $HOME/Library/Caches/electron
+    - $HOME/Library/Caches/electron-builder
+    - $HOME/.pkg-cache
+    - node_modules
 
 services:
   - docker
@@ -19,11 +34,13 @@ env:
     - CCACHE_COMPRESS=1
     - CC="clang"
     - CXX="clang++"
+    - HOMEBREW_NO_AUTO_UPDATE=1
   matrix:
     - TARGET_ARCH=x64
     - TARGET_ARCH=x86
 
 matrix:
+  fast_finish: true
   exclude:
     - os: osx
       env: TARGET_ARCH=x86
@@ -33,30 +50,24 @@ os:
   - osx
 
 before_install:
-  - npm config set spin=false
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then PATH=/usr/local/opt/ccache/libexec:$PATH; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      export HOST_OS="darwin";
+    else
+      export HOST_OS="$TRAVIS_OS_NAME";
+    fi
 
 install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      ./scripts/build/docker/run-command.sh -r "${TARGET_ARCH}" -s "${PWD}" -c "make info && make electron-develop";
-    else
-      pip install codespell==1.9.2 awscli;
-      npm install -g bower asar;
-      brew install afsctool jq;
-      make info;
-      make electron-develop;
-    fi
+  - ./scripts/ci/install.sh -o $HOST_OS -r $TARGET_ARCH
 
 script:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      ./scripts/build/docker/run-command.sh -r "${TARGET_ARCH}" -s "${PWD}" -c "make sanity-checks && xvfb-run --server-args=$XVFB_ARGS npm test";
-    else
-      make sanity-checks && npm test;
-    fi
+  - ./scripts/ci/test.sh -o $HOST_OS -r $TARGET_ARCH
+  - ./scripts/ci/build-installers.sh -o $HOST_OS -r $TARGET_ARCH
 
 deploy:
   provider: script
   skip_cleanup: true
-  script: scripts/ci/deploy-travis.sh
+  script: scripts/ci/deploy.sh -o $HOST_OS -r $TARGET_ARCH
   on:
     branch: master
 

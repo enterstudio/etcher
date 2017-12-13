@@ -32,7 +32,6 @@ function usage() {
   echo "    -t <target platform (node|electron)>"
   echo "    -s <target operating system>"
   echo "    -x <install prefix>"
-  echo "    -f force install"
   echo "    -p production install"
   exit 1
 }
@@ -42,17 +41,15 @@ ARGV_TARGET_VERSION=""
 ARGV_TARGET_PLATFORM=""
 ARGV_TARGET_OPERATING_SYSTEM=""
 ARGV_PREFIX=""
-ARGV_FORCE=false
 ARGV_PRODUCTION=false
 
-while getopts ":r:v:t:s:x:fp" option; do
+while getopts ":r:v:t:s:x:p" option; do
   case $option in
     r) ARGV_ARCHITECTURE=$OPTARG ;;
     v) ARGV_TARGET_VERSION=$OPTARG ;;
     t) ARGV_TARGET_PLATFORM=$OPTARG ;;
     s) ARGV_TARGET_OPERATING_SYSTEM=$OPTARG ;;
     x) ARGV_PREFIX=$OPTARG ;;
-    f) ARGV_FORCE=true ;;
     p) ARGV_PRODUCTION=true ;;
     *) usage ;;
   esac
@@ -85,11 +82,7 @@ export npm_config_build_from_source=true
 ELECTRON_ARCHITECTURE=$(./scripts/build/architecture-convert.sh -r "$ARGV_ARCHITECTURE" -t node)
 export npm_config_arch=$ELECTRON_ARCHITECTURE
 
-INSTALL_OPTS=""
-
-if [ "$ARGV_FORCE" == "true" ]; then
-  INSTALL_OPTS="$INSTALL_OPTS --force"
-fi
+INSTALL_OPTS="--fetch-retries 10 --fetch-retry-maxtimeout 180000"
 
 if [ "$ARGV_PRODUCTION" == "true" ]; then
   INSTALL_OPTS="$INSTALL_OPTS --production"
@@ -106,9 +99,9 @@ function run_install() {
 
   # When changing between target architectures, rebuild all dependencies,
   # since compiled add-ons will not work otherwise.
-  npm rebuild
+  npm rebuild --silent > /dev/null
 
-  npm install $INSTALL_OPTS
+  npm install --silent $INSTALL_OPTS > /dev/null
 
   if [ "$ARGV_PRODUCTION" == "true" ]; then
 
@@ -129,12 +122,23 @@ if [ -n "$ARGV_PREFIX" ]; then
     cp "$PWD/npm-shrinkwrap.json" "$ARGV_PREFIX/npm-shrinkwrap.json"
   fi
 
+  if [ -f "$PWD/binding.gyp" ]; then
+    cp "$PWD/binding.gyp" "$ARGV_PREFIX/binding.gyp"
+  fi
+
+  # Handle native code, if any
+  if [ -d "$PWD/src" ]; then
+    cp -RLf "$PWD/src" "$ARGV_PREFIX/src"
+  fi
+
   pushd "$ARGV_PREFIX"
   run_install
   popd
 
   rm -f "$ARGV_PREFIX/package.json"
   rm -f "$ARGV_PREFIX/npm-shrinkwrap.json"
+  rm -f "$ARGV_PREFIX/binding.gyp"
+  rm -rf "$ARGV_PREFIX/src"
 else
   run_install
 fi
