@@ -1,0 +1,40 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.14.1
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  SNYK-JS-LODASH-567746:
+    - lodash:
+        patched: '2020-05-01T03:36:54.730Z'
+    - deep-map-keys > lodash:
+        patched: '2020-05-01T03:36:54.730Z'
+    - etcher-image-write > lodash:
+        patched: '2020-05-01T03:36:54.730Z'
+    - lodash-deep > lodash:
+        patched: '2020-05-01T03:36:54.730Z'
+    - redux > lodash:
+        patched: '2020-05-01T03:36:54.730Z'
+    - resin-cli-visuals > lodash:
+        patched: '2020-05-01T03:36:54.730Z'
+    - resin-cli-form > lodash:
+        patched: '2020-05-01T03:36:54.730Z'
+    - etcher-image-write > bmapflash > lodash:
+        patched: '2020-05-01T03:36:54.730Z'
+    - resin-cli-visuals > etcher-sdk > lodash:
+        patched: '2020-05-01T03:36:54.730Z'
+    - resin-cli-visuals > inquirer > lodash:
+        patched: '2020-05-01T03:36:54.730Z'
+    - resin-cli-form > resin-cli-visuals > lodash:
+        patched: '2020-05-01T03:36:54.730Z'
+    - resin-cli-visuals > etcher-sdk > resin-image-fs > lodash:
+        patched: '2020-05-01T03:36:54.730Z'
+    - resin-cli-form > resin-cli-visuals > etcher-sdk > lodash:
+        patched: '2020-05-01T03:36:54.730Z'
+    - resin-cli-form > resin-cli-visuals > inquirer > lodash:
+        patched: '2020-05-01T03:36:54.730Z'
+    - resin-cli-form > resin-cli-visuals > etcher-sdk > resin-image-fs > lodash:
+        patched: '2020-05-01T03:36:54.730Z'
+    - resin-cli-visuals > etcher-sdk > resin-image-fs > ext2fs > async > lodash:
+        patched: '2020-05-01T03:36:54.730Z'
+    - resin-cli-form > resin-cli-visuals > etcher-sdk > resin-image-fs > ext2fs > async > lodash:
+        patched: '2020-05-01T03:36:54.730Z'
