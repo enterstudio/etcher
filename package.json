@@ -92,7 +92,7 @@
     "path-is-inside": "^1.0.2",
     "redux": "^3.5.2",
     "redux-localstorage": "^0.4.1",
-    "resin-cli-form": "^1.4.1",
+    "resin-cli-form": "^2.0.0",
     "resin-cli-visuals": "^1.2.8",
     "rx": "^4.1.0",
     "semver": "^5.1.0",
